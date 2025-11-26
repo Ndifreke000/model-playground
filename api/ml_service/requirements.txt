@@ -3,7 +3,7 @@ uvicorn[standard]==0.24.0
 torch==2.5.1
 scikit-learn==1.7.2
 pydantic==2.5.0
-pandas>=2.2.0
+pandas==2.2.3
 numpy==2.1.0
 python-multipart==0.0.6
 kagglehub==0.3.13

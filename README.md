@@ -24,6 +24,8 @@ It features a **Hybrid Architecture**:
 -   **Privacy First:** Inference runs locally; data doesn't need to leave your server.
 -   **Auto-Training:** Automated pipeline to download datasets and retrain the model.
 -   **Modern UI:** Clean, responsive interface built with shadcn/ui.
+-   **User Authentication:** Secure sign-up and login via Supabase.
+-   **Database Storage:** Persistent storage for user history and reports using Supabase.
 
 ## 📊 Model Performance
 
@@ -52,12 +54,14 @@ The model was trained on the **Misinformation Fake News Text Dataset (79k articl
 -   **Vite**: Next-generation frontend tooling.
 -   **Tailwind CSS**: Utility-first styling.
 -   **shadcn/ui**: Reusable component library.
+-   **Supabase**: Authentication & Database.
 
 ## 🏁 Quick Start
 
 ### Prerequisites
 -   Node.js & npm
 -   Python 3.10+
+-   Supabase Account (for Auth & DB)
 
 ### 1. Clone the Repository
 ```bash
@@ -65,7 +69,16 @@ git clone https://github.com/yourusername/model-playground.git
 cd model-playground
 ```
 
-### 2. Set Up ML Backend
+### 2. Set Up Environment Variables
+Create a `.env` file in the root directory with the following variables:
+```env
+VITE_SUPABASE_PROJECT_ID="your_supabase_project_id"
+VITE_SUPABASE_PUBLISHABLE_KEY="your_supabase_anon_key"
+VITE_SUPABASE_URL="your_supabase_url"
+VITE_ML_API_URL="http://localhost:8000"
+```
+
+### 3. Set Up ML Backend
 ```bash
 cd api/ml_service
 
@@ -75,9 +88,12 @@ cd api/ml_service
 ```
 *The API will be available at `http://localhost:8000`*
 
-### 3. Start Frontend
+### 4. Start Frontend
 Open a new terminal:
 ```bash
+# Return to root if needed
+cd ../..
+
 # Install dependencies
 npm install
 
@@ -109,7 +125,8 @@ Input Layer (1000 nodes) ➔ ReLU ➔ Hidden Layer (64 nodes) ➔ Sigmoid ➔ Ou
 │   └── models/            # Saved Artifacts (.pth, .pkl)
 ├── src/                   # React Frontend
 │   ├── components/        # UI Components
-│   └── lib/api/           # API Client
+│   ├── lib/api/           # API Client
+│   └── lib/supabase.ts    # Supabase Client
 └── docs/                  # Documentation
     ├── ARCHITECTURE.md    # System Design
     └── ML_INTEGRATION.md  # Integration Guide
