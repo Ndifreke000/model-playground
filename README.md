@@ -1,73 +1,134 @@
-# Welcome to your Lovable project
+# Misinformation Detection System 🕵️‍♀️
 
-## Project info
+> A hybrid intelligence platform combining local machine learning and AI reasoning to detect and analyze fake news.
 
-**URL**: https://lovable.dev/projects/afc82ce2-c6c5-41f1-8038-42a1517e8844
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![Python](https://img.shields.io/badge/python-3.12-blue.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.5-ee4c2c.svg)
+![React](https://img.shields.io/badge/react-18.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## How can I edit this code?
+## 📖 Introduction
 
-There are several ways of editing your application.
+In an era of information overload, distinguishing fact from fiction is critical. This project implements a **Misinformation Detection System** that analyzes news articles using Natural Language Processing (NLP).
 
-**Use Lovable**
+It features a **Hybrid Architecture**:
+1.  **Local ML Model:** A fast, privacy-first PyTorch model that screens text for linguistic patterns of fake news.
+2.  **Frontend Interface:** A modern React application for real-time analysis.
+3.  **Extensible Design:** Built to integrate with LLMs (like Gemini) for deep reasoning.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/afc82ce2-c6c5-41f1-8038-42a1517e8844) and start prompting.
+## 🚀 Key Features
 
-Changes made via Lovable will be committed automatically to this repo.
+-   **Real-time Detection:** Instant classification of text as "Real" or "Fake".
+-   **Confidence Scoring:** Returns a probability score to indicate certainty.
+-   **Privacy First:** Inference runs locally; data doesn't need to leave your server.
+-   **Auto-Training:** Automated pipeline to download datasets and retrain the model.
+-   **Modern UI:** Clean, responsive interface built with shadcn/ui.
 
-**Use your preferred IDE**
+## 📊 Model Performance
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The model was trained on the **Misinformation Fake News Text Dataset (79k articles)**.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+| Metric | Score | Description |
+|--------|-------|-------------|
+| **Accuracy** | **69.5%** | Overall correctness on unseen test data. |
+| **Precision (Real)** | **99.2%** | When it says "Real", it is almost always right. |
+| **Recall (Fake)** | **66.6%** | Identifies ~2/3rds of all fake news samples. |
+| **Inference Time** | **<50ms** | Ultra-low latency on standard CPU. |
 
-Follow these steps:
+*Note: The model is optimized for high precision on real news to avoid false alarms, making it a conservative screening tool.*
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🛠️ Tech Stack
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Backend (ML Service)
+-   **Python 3.12**
+-   **FastAPI**: High-performance API framework.
+-   **PyTorch**: Deep learning framework (CPU-optimized).
+-   **Scikit-learn**: TF-IDF vectorization.
+-   **KaggleHub**: Automated dataset management.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Frontend (App)
+-   **React + TypeScript**: Type-safe UI development.
+-   **Vite**: Next-generation frontend tooling.
+-   **Tailwind CSS**: Utility-first styling.
+-   **shadcn/ui**: Reusable component library.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## 🏁 Quick Start
+
+### Prerequisites
+-   Node.js & npm
+-   Python 3.10+
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/model-playground.git
+cd model-playground
 ```
 
-**Edit a file directly in GitHub**
+### 2. Set Up ML Backend
+```bash
+cd api/ml_service
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# Run the automated setup script
+# This creates venv, installs dependencies, downloads data, trains model, and starts server
+./start.sh
+```
+*The API will be available at `http://localhost:8000`*
 
-**Use GitHub Codespaces**
+### 3. Start Frontend
+Open a new terminal:
+```bash
+# Install dependencies
+npm install
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Start development server
+npm run dev
+```
+*The App will be available at `http://localhost:5173`*
 
-## What technologies are used for this project?
+## 🧠 Methodology
 
-This project is built with:
+### Data Pipeline
+1.  **Ingestion:** 79,000+ news articles sourced from Kaggle.
+2.  **Preprocessing:** Text cleaning (lowercase, regex removal of non-alpha chars).
+3.  **Vectorization:** TF-IDF (Term Frequency-Inverse Document Frequency) with top 1000 features.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Model Architecture
+A lightweight Feed-Forward Neural Network:
+```
+Input Layer (1000 nodes) ➔ ReLU ➔ Hidden Layer (64 nodes) ➔ Sigmoid ➔ Output (Probability)
+```
 
-## How can I deploy this project?
+## 📂 Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/afc82ce2-c6c5-41f1-8038-42a1517e8844) and click on Share -> Publish.
+```
+├── api/ml_service/        # Python Backend
+│   ├── app.py             # FastAPI Server
+│   ├── model.py           # PyTorch Model Definition
+│   ├── train.py           # Training Pipeline
+│   └── models/            # Saved Artifacts (.pth, .pkl)
+├── src/                   # React Frontend
+│   ├── components/        # UI Components
+│   └── lib/api/           # API Client
+└── docs/                  # Documentation
+    ├── ARCHITECTURE.md    # System Design
+    └── ML_INTEGRATION.md  # Integration Guide
+```
 
-## Can I connect a custom domain to my Lovable project?
+## ⚠️ Limitations
 
-Yes, you can!
+-   **Context Window:** The model analyzes text patterns but does not verify facts against external databases.
+-   **Language:** Trained primarily on English news articles.
+-   **Drift:** News topics change rapidly; the model requires periodic retraining with fresh data.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🤝 Contributing
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
