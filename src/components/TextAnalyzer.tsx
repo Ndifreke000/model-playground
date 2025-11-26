@@ -1,54 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Loader2, ScanSearch, Sparkles } from "lucide-react";
 import { AnalysisResult } from "./AnalysisResult";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface PredictionResult {
   prediction: number;
   confidence: number;
+  reasoning?: string;
+  red_flags?: string[];
+  authenticity_indicators?: string[];
 }
 
-// Mock prediction function - simulates the PyTorch model behavior
-const mockPredict = (text: string): Promise<PredictionResult> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Simple heuristic for demo: longer, more formal text is more likely "real"
-      const wordCount = text.trim().split(/\s+/).length;
-      const hasProperPunctuation = /[.!?]/.test(text);
-      const hasCapitalization = /[A-Z]/.test(text);
-      const hasShortSentences = text.split(/[.!?]/).some(s => s.trim().split(/\s+/).length < 5);
-      
-      let score = 0.5;
-      if (wordCount > 50) score += 0.15;
-      if (hasProperPunctuation) score += 0.1;
-      if (hasCapitalization) score += 0.1;
-      if (hasShortSentences) score -= 0.15;
-      
-      // Add some randomness
-      score += (Math.random() - 0.5) * 0.2;
-      score = Math.max(0.1, Math.min(0.9, score));
-      
-      resolve({
-        prediction: score,
-        confidence: 0.7 + Math.random() * 0.25
-      });
-    }, 1500);
-  });
-};
-
 const exampleTexts = [
-  "Breaking: Scientists discover that drinking coffee can cure all diseases overnight. No medical research needed!",
-  "The Federal Reserve announced today that it will maintain current interest rates amid ongoing economic uncertainty. The decision was made following extensive review of inflation data and employment statistics.",
-  "You won't believe what this celebrity did! Doctors hate them for this one weird trick!"
+  "Breaking: President announces new economic reforms aimed at reducing inflation and boosting local manufacturing. Finance Minister confirms details in official statement.",
+  "BREAKING!!! You won't believe what this politician did! Click now before it's deleted! No evidence needed, just trust us!",
+  "The Central Bank of Nigeria has raised the monetary policy rate by 50 basis points to 18.75% to curb rising inflation, according to an official press release today."
 ];
 
 export const TextAnalyzer = () => {
+  const navigate = useNavigate();
   const [text, setText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<PredictionResult | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check auth status
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleAnalyze = async () => {
     if (!text.trim()) {
@@ -65,11 +59,46 @@ export const TextAnalyzer = () => {
     setResult(null);
 
     try {
-      // In production, this would call your backend API with the trained model
-      const prediction = await mockPredict(text);
-      setResult(prediction);
+      // Call the edge function
+      const { data, error } = await supabase.functions.invoke('analyze-news', {
+        body: { text }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        if (data.error.includes('Rate limit')) {
+          toast.error("Rate limit exceeded. Please try again later.");
+        } else if (data.error.includes('credits')) {
+          toast.error("AI service credits depleted. Please contact support.");
+        } else {
+          toast.error(data.error);
+        }
+        return;
+      }
+
+      setResult(data);
+      
+      // Save to history if user is logged in
+      if (user) {
+        const { error: saveError } = await supabase
+          .from("analysis_history")
+          .insert({
+            user_id: user.id,
+            text: text,
+            prediction: data.prediction,
+            confidence: data.confidence,
+            is_authentic: data.prediction >= 0.5
+          });
+
+        if (saveError) {
+          console.error("Error saving to history:", saveError);
+        }
+      }
+
       toast.success("Analysis complete!");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Analysis error:", error);
       toast.error("Failed to analyze text. Please try again.");
     } finally {
       setIsAnalyzing(false);
@@ -92,7 +121,7 @@ export const TextAnalyzer = () => {
         <Textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Paste a news article, headline, or any text you want to verify..."
+          placeholder="Paste a news article, headline, or any text you want to verify for authenticity..."
           className="min-h-[200px] mb-4 text-base resize-none"
           disabled={isAnalyzing}
         />
@@ -113,6 +142,14 @@ export const TextAnalyzer = () => {
           ))}
         </div>
 
+        {!user && (
+          <div className="mb-4 p-3 bg-accent/30 border border-accent rounded-md">
+            <p className="text-sm text-accent-foreground">
+              💡 <strong>Tip:</strong> Sign in to save your analysis history and track your results over time.
+            </p>
+          </div>
+        )}
+
         <Button
           onClick={handleAnalyze}
           disabled={isAnalyzing || !text.trim()}
@@ -122,7 +159,7 @@ export const TextAnalyzer = () => {
           {isAnalyzing ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Analyzing...
+              Analyzing with AI...
             </>
           ) : (
             <>
@@ -133,7 +170,7 @@ export const TextAnalyzer = () => {
         </Button>
       </Card>
 
-      {result && <AnalysisResult prediction={result.prediction} confidence={result.confidence} />}
+      {result && <AnalysisResult prediction={result.prediction} confidence={result.confidence} reasoning={result.reasoning} redFlags={result.red_flags} authenticityIndicators={result.authenticity_indicators} />}
     </div>
   );
 };

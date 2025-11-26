@@ -1,13 +1,22 @@
-import { Shield, AlertTriangle, TrendingUp } from "lucide-react";
+import { Shield, AlertTriangle, TrendingUp, CheckCircle, XCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 interface AnalysisResultProps {
   prediction: number;
   confidence: number;
+  reasoning?: string;
+  redFlags?: string[];
+  authenticityIndicators?: string[];
 }
 
-export const AnalysisResult = ({ prediction, confidence }: AnalysisResultProps) => {
+export const AnalysisResult = ({ 
+  prediction, 
+  confidence, 
+  reasoning,
+  redFlags,
+  authenticityIndicators 
+}: AnalysisResultProps) => {
   const isReal = prediction >= 0.5;
   const displayConfidence = Math.round(confidence * 100);
 
@@ -50,23 +59,61 @@ export const AnalysisResult = ({ prediction, confidence }: AnalysisResultProps) 
         </div>
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Model Confidence</span>
+            <span className="text-muted-foreground">AI Confidence</span>
             <span className="font-bold text-card-foreground">{displayConfidence}%</span>
           </div>
           <Progress 
             value={displayConfidence} 
             className="h-3"
           />
-          <p className="text-xs text-muted-foreground mt-2">
-            Based on text analysis using TF-IDF features and neural network classification
-          </p>
         </div>
       </Card>
+
+      {reasoning && (
+        <Card className="p-6 bg-card">
+          <h4 className="font-semibold text-card-foreground mb-3">AI Analysis</h4>
+          <p className="text-sm text-muted-foreground">{reasoning}</p>
+        </Card>
+      )}
+
+      {redFlags && redFlags.length > 0 && (
+        <Card className="p-6 bg-destructive/10 border-destructive/30">
+          <div className="flex items-center gap-2 mb-3">
+            <XCircle className="w-5 h-5 text-destructive" />
+            <h4 className="font-semibold text-destructive">Red Flags</h4>
+          </div>
+          <ul className="space-y-2">
+            {redFlags.map((flag, idx) => (
+              <li key={idx} className="text-sm text-destructive/90 flex items-start gap-2">
+                <span className="text-destructive mt-1">•</span>
+                <span>{flag}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+
+      {authenticityIndicators && authenticityIndicators.length > 0 && (
+        <Card className="p-6 bg-success/10 border-success/30">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle className="w-5 h-5 text-success" />
+            <h4 className="font-semibold text-success">Authenticity Indicators</h4>
+          </div>
+          <ul className="space-y-2">
+            {authenticityIndicators.map((indicator, idx) => (
+              <li key={idx} className="text-sm text-success/90 flex items-start gap-2">
+                <span className="text-success mt-1">•</span>
+                <span>{indicator}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <Card className="p-6 bg-accent/30 border-accent">
         <h4 className="font-semibold text-accent-foreground mb-2">Important Notice</h4>
         <p className="text-sm text-accent-foreground/80">
-          This is an AI-powered prediction tool. Always verify information through multiple 
+          This is an AI-powered prediction tool trained for Nigerian news context. Always verify information through multiple 
           trusted sources before drawing conclusions. No automated system is 100% accurate.
         </p>
       </Card>
