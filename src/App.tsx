@@ -9,6 +9,7 @@ import AuthPage from "./pages/AuthPage";
 import History from "./pages/History";
 import Insights from "./pages/Insights";
 import Batch from "./pages/Batch";
+import Misinformation from "./pages/Misinformation";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/history" element={<History />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/batch" element={<Batch />} />
+          <Route path="/misinformation" element={<Misinformation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
