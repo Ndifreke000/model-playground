@@ -30,15 +30,15 @@ serve(async (req) => {
       );
     }
 
-    // System prompt for Nigerian news context analysis
-    const systemPrompt = `You are an expert AI news detector trained to identify misinformation and fake news, with specific expertise in Nigerian news context.
+    // System prompt for news analysis
+    const systemPrompt = `You are an expert AI news detector trained to identify misinformation and fake news.
 
 Your task is to analyze news text and determine if it's authentic or misinformation based on:
 1. Factual accuracy and verifiable claims
 2. Source credibility indicators
 3. Writing style and language patterns typical of misinformation
-4. Nigerian context: political, social, and cultural references
-5. Common misinformation tactics used in Nigerian media landscape
+4. Political, social, and cultural context
+5. Common misinformation tactics used in media
 
 Respond with a JSON object containing:
 {
@@ -49,7 +49,7 @@ Respond with a JSON object containing:
   "authenticity_indicators": ["<list of positive signs if any>"]
 }
 
-Be objective and consider the Nigerian context in your analysis.`;
+Be objective in your analysis.`;
 
     console.log('Analyzing text with Lovable AI...');
 

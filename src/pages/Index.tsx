@@ -46,7 +46,7 @@ const Index = () => {
               <Shield className="w-8 h-8 text-primary" />
               <div>
                 <h2 className="text-xl font-bold">AI News Detector</h2>
-                <p className="text-xs text-muted-foreground">Nigerian Context</p>
+                <p className="text-xs text-muted-foreground">Misinformation Analysis</p>
               </div>
             </div>
             
@@ -121,7 +121,7 @@ const Index = () => {
             AI News Detector
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
-            Combat misinformation with AI-powered analysis trained on Nigerian media context
+            Combat misinformation with AI-powered analysis using advanced language models
           </p>
         </div>
       </header>
@@ -138,7 +138,7 @@ const Index = () => {
               <h3 className="font-semibold text-card-foreground">AI-Powered</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Advanced language models analyze news authenticity with Nigerian context awareness
+              Advanced language models analyze news authenticity with high accuracy
             </p>
           </Card>
 
@@ -150,7 +150,7 @@ const Index = () => {
               <h3 className="font-semibold text-card-foreground">Context-Aware</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Specialized in Nigerian political, social, and cultural news patterns
+              Understands political, social, and cultural news patterns globally
             </p>
           </Card>
 
@@ -175,7 +175,7 @@ const Index = () => {
       <footer className="mt-16 py-8 px-4 border-t border-border">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-muted-foreground">
-            AI-powered news analysis for the Nigerian context. Built with advanced language models.
+            AI-powered news analysis built with advanced language models.
           </p>
         </div>
       </footer>
