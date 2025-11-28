@@ -1,151 +1,145 @@
-# Misinformation Detection System 🕵️‍♀️
+# Misinformation Detection ML Service
 
-> A hybrid intelligence platform combining local machine learning and AI reasoning to detect and analyze fake news.
+This service provides an API for detecting fake news using a PyTorch-based machine learning model extracted from the Jupyter notebook.
 
-![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![Python](https://img.shields.io/badge/python-3.12-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.5-ee4c2c.svg)
-![React](https://img.shields.io/badge/react-18.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+## Quick Start
 
-## 📖 Introduction
+### 1. Install Dependencies
 
-In an era of information overload, distinguishing fact from fiction is critical. This project implements a **Misinformation Detection System** that analyzes news articles using Natural Language Processing (NLP).
-
-It features a **Hybrid Architecture**:
-1.  **Local ML Model:** A fast, privacy-first PyTorch model that screens text for linguistic patterns of fake news.
-2.  **Frontend Interface:** A modern React application for real-time analysis.
-3.  **Extensible Design:** Built to integrate with LLMs (like Gemini) for deep reasoning.
-
-## 🚀 Key Features
-
--   **Real-time Detection:** Instant classification of text as "Real" or "Fake".
--   **Confidence Scoring:** Returns a probability score to indicate certainty.
--   **Privacy First:** Inference runs locally; data doesn't need to leave your server.
--   **Auto-Training:** Automated pipeline to download datasets and retrain the model.
--   **Modern UI:** Clean, responsive interface built with shadcn/ui.
--   **User Authentication:** Secure sign-up and login via Supabase.
--   **Database Storage:** Persistent storage for user history and reports using Supabase.
-
-## 📊 Model Performance
-
-The model was trained on the **Misinformation Fake News Text Dataset (79k articles)**.
-
-| Metric | Score | Description |
-|--------|-------|-------------|
-| **Accuracy** | **69.5%** | Overall correctness on unseen test data. |
-| **Precision (Real)** | **99.2%** | When it says "Real", it is almost always right. |
-| **Recall (Fake)** | **66.6%** | Identifies ~2/3rds of all fake news samples. |
-| **Inference Time** | **<50ms** | Ultra-low latency on standard CPU. |
-
-*Note: The model is optimized for high precision on real news to avoid false alarms, making it a conservative screening tool.*
-
-## 🛠️ Tech Stack
-
-### Backend (ML Service)
--   **Python 3.12**
--   **FastAPI**: High-performance API framework.
--   **PyTorch**: Deep learning framework (CPU-optimized).
--   **Scikit-learn**: TF-IDF vectorization.
--   **KaggleHub**: Automated dataset management.
-
-### Frontend (App)
--   **React + TypeScript**: Type-safe UI development.
--   **Vite**: Next-generation frontend tooling.
--   **Tailwind CSS**: Utility-first styling.
--   **shadcn/ui**: Reusable component library.
--   **Supabase**: Authentication & Database.
-
-## 🏁 Quick Start
-
-### Prerequisites
--   Node.js & npm
--   Python 3.10+
--   Supabase Account (for Auth & DB)
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/yourusername/model-playground.git
-cd model-playground
-```
-
-### 2. Set Up Environment Variables
-Create a `.env` file in the root directory with the following variables:
-```env
-VITE_SUPABASE_PROJECT_ID="your_supabase_project_id"
-VITE_SUPABASE_PUBLISHABLE_KEY="your_supabase_anon_key"
-VITE_SUPABASE_URL="your_supabase_url"
-VITE_ML_API_URL="http://localhost:8000"
-```
-
-### 3. Set Up ML Backend
 ```bash
 cd api/ml_service
-
-# Run the automated setup script
-# This creates venv, installs dependencies, downloads data, trains model, and starts server
-./start.sh
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 ```
-*The API will be available at `http://localhost:8000`*
 
-### 4. Start Frontend
-Open a new terminal:
+### 2. Prepare Data
+
+The dataset will be **automatically downloaded** using kagglehub when you run training:
+
 ```bash
-# Return to root if needed
-cd ../..
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-*The App will be available at `http://localhost:5173`*
-
-## 🧠 Methodology
-
-### Data Pipeline
-1.  **Ingestion:** 79,000+ news articles sourced from Kaggle.
-2.  **Preprocessing:** Text cleaning (lowercase, regex removal of non-alpha chars).
-3.  **Vectorization:** TF-IDF (Term Frequency-Inverse Document Frequency) with top 1000 features.
-
-### Model Architecture
-A lightweight Feed-Forward Neural Network:
-```
-Input Layer (1000 nodes) ➔ ReLU ➔ Hidden Layer (64 nodes) ➔ Sigmoid ➔ Output (Probability)
+python train.py  # Downloads dataset automatically!
 ```
 
-## 📂 Project Structure
-
-```
-├── api/ml_service/        # Python Backend
-│   ├── app.py             # FastAPI Server
-│   ├── model.py           # PyTorch Model Definition
-│   ├── train.py           # Training Pipeline
-│   └── models/            # Saved Artifacts (.pth, .pkl)
-├── src/                   # React Frontend
-│   ├── components/        # UI Components
-│   ├── lib/api/           # API Client
-│   └── lib/supabase.ts    # Supabase Client
-└── docs/                  # Documentation
-    ├── ARCHITECTURE.md    # System Design
-    └── ML_INTEGRATION.md  # Integration Guide
+**Alternative: Manual download** (optional)
+```bash
+python download_data.py  # Download separately first
 ```
 
-## ⚠️ Limitations
+**Kaggle Credentials Required:**
+- Create account at [kaggle.com](https://www.kaggle.com)
+- Go to Account → API → Create New Token
+- Save `kaggle.json` to `~/.kaggle/kaggle.json`
+- Set permissions: `chmod 600 ~/.kaggle/kaggle.json`
 
--   **Context Window:** The model analyzes text patterns but does not verify facts against external databases.
--   **Language:** Trained primarily on English news articles.
--   **Drift:** News topics change rapidly; the model requires periodic retraining with fresh data.
+More info: [Kaggle API Docs](https://www.kaggle.com/docs/api)
 
-## 🤝 Contributing
+### 3. Train the Model
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+```bash
+python train.py
+```
 
-## 📜 License
+This will:
+- Load and preprocess the dataset
+- Train the model for 10 epochs
+- Save model weights to `models/fake_news_model.pth`
+- Save vectorizer to `models/tfidf_vectorizer.pkl`
+- Generate training plots
 
-Distributed under the MIT License. See `LICENSE` for more information.
+### 4. Start the API Server
+
+```bash
+python app.py
+# Or using uvicorn directly:
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+## 🚀 Live Deployment
+
+**API URL:** `https://yosemite000-misinformation-detector.hf.space`
+
+You can test the live API directly using the endpoints below.
+
+## API Endpoints
+
+### Health Check
+```bash
+GET /health
+```
+
+### Single Prediction
+```bash
+POST /predict
+Content-Type: application/json
+
+{
+  "text": "Your news article text here..."
+}
+```
+
+Response:
+```json
+{
+  "prediction": "fake",
+  "confidence": 0.87,
+  "raw_score": 0.13
+}
+```
+
+### Batch Prediction
+```bash
+POST /batch_predict
+Content-Type: application/json
+
+{
+  "texts": [
+    "First article...",
+    "Second article..."
+  ]
+}
+```
+
+## Testing
+
+Test the API with curl:
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Single prediction
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Breaking news: Scientists discover..."}'
+```
+
+## Model Details
+
+- **Architecture**: 2-layer neural network (1000 → 64 → 1)
+- **Input**: TF-IDF vectors (max 1000 features)
+- **Output**: Binary classification (fake/real)
+- **Accuracy**: ~67.5% on test set
+- **Framework**: PyTorch 2.9.1
+
+## Environment Variables
+
+- `API_HOST`: Server host (default: 0.0.0.0)
+- `API_PORT`: Server port (default: 8000)
+- `CORS_ORIGINS`: Allowed origins (default: localhost:5173,3000)
+
+## Troubleshooting
+
+**Model not found error:**
+- Ensure you've run `python train.py` first
+- Check that `models/` directory contains .pth and .pkl files
+
+**CUDA errors:**
+- The model automatically falls back to CPU if CUDA is unavailable
+- Check with: `python -c "import torch; print(torch.cuda.is_available())"`
+
+**Import errors:**
+- Activate virtual environment: `source venv/bin/activate`
+- Reinstall dependencies: `pip install -r requirements.txt`
