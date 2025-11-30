@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# API directory (ML service deployed separately on Hugging Face)
+api/
+
 # Python virtual environments
 venv/
 env/

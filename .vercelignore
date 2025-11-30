@@ -1,0 +1,17 @@
+# Ignore ML service directory - deployed separately on Hugging Face
+api/
+
+# Ignore documentation
+*.md
+!README.md
+
+# Ignore Jupyter notebooks
+*.ipynb
+
+# Ignore Python virtual environments
+venv/
+.venv/
+__pycache__/
+
+# Ignore model files
+models/
