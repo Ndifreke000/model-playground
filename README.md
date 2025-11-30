@@ -1,280 +1,284 @@
-# AI News Detector - Misinformation Analysis System
+# Misinformation Detection System
 
-A sophisticated misinformation detection platform using multi-algorithm AI analysis with chain-of-thought reasoning and interactive investigation capabilities.
+A machine learning-powered platform for detecting fake news using a PyTorch neural network with TF-IDF text vectorization.
 
-## 🚀 Live Demo
+## 🚀 Live API
 
-**Frontend:** Deployed on Lovable  
-**Backend API:** `https://yosemite000-misinformation-detector.hf.space` (Legacy PyTorch model)
+**ML API:** `https://yosemite000-misinformation-detector.hf.space`
 
-## 🏗️ Architecture
+## 🧠 Machine Learning Model
+
+### Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND                                  │
-│                   React + TypeScript + Tailwind                  │
-│                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │   Index     │  │   History   │  │   Insights              │  │
-│  │   Page      │  │   Page      │  │   Page                  │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────────┘  │
-│         │                │                     │                 │
-│         └────────────────┼─────────────────────┘                 │
-│                          │                                       │
-│              ┌───────────▼───────────┐                          │
-│              │  AdvancedAnalyzer     │                          │
-│              │  Component            │                          │
-│              └───────────┬───────────┘                          │
-└──────────────────────────┼──────────────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────────────┐
-│                    BACKEND (Supabase)                            │
-│                                                                  │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Edge Functions (Deno/TypeScript)            │    │
-│  │                                                          │    │
-│  │  ┌──────────────────┐  ┌──────────────────────────────┐ │    │
-│  │  │ analyze-news-    │  │ investigate-chat             │ │    │
-│  │  │ advanced         │  │                              │ │    │
-│  │  │                  │  │ Interactive Q&A about        │ │    │
-│  │  │ 5 AI Algorithms: │  │ analysis results             │ │    │
-│  │  │ • Factual        │  └──────────────────────────────┘ │    │
-│  │  │ • Linguistic     │                                   │    │
-│  │  │ • Sentiment      │  ┌──────────────────────────────┐ │    │
-│  │  │ • Source         │  │ analyze-news (legacy)        │ │    │
-│  │  │ • Propaganda     │  │ Simple single-pass analysis  │ │    │
-│  │  │                  │  └──────────────────────────────┘ │    │
-│  │  │ + Synthesis      │                                   │    │
-│  │  └──────────────────┘                                   │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                  │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              Lovable AI Gateway                          │    │
-│  │              (Google Gemini 2.5 Flash)                   │    │
-│  └─────────────────────────────────────────────────────────┘    │
-│                                                                  │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │              PostgreSQL Database                         │    │
-│  │              • analysis_history table                    │    │
-│  │              • User authentication (Supabase Auth)       │    │
-│  └─────────────────────────────────────────────────────────┘    │
-└──────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Neural Network                            │
+│                                                              │
+│   Input Layer        Hidden Layer        Output Layer        │
+│   (1000 neurons)     (64 neurons)        (1 neuron)         │
+│                                                              │
+│   ┌─────────┐        ┌─────────┐        ┌─────────┐         │
+│   │ TF-IDF  │───────▶│  ReLU   │───────▶│ Sigmoid │         │
+│   │ Vector  │        │ + Dropout│        │         │         │
+│   └─────────┘        └─────────┘        └─────────┘         │
+│                                                              │
+│   1000 features      64 hidden units     Binary output       │
+│                      0.3 dropout         (fake/real)         │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Model Details
+
+| Specification | Value |
+|---------------|-------|
+| **Framework** | PyTorch 2.9.1 |
+| **Architecture** | Feedforward Neural Network |
+| **Input Features** | 1000 (TF-IDF) |
+| **Hidden Layer** | 64 neurons, ReLU activation |
+| **Dropout** | 0.3 |
+| **Output** | Sigmoid (binary classification) |
+| **Optimizer** | Adam (lr=0.001) |
+| **Loss Function** | Binary Cross-Entropy |
+| **Training Epochs** | 10 |
+
+### Performance Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Test Accuracy** | 69.5% |
+| **Precision (Real)** | 99.2% |
+| **Recall (Fake)** | 66.6% |
+| **Inference Speed** | <50ms |
+
+### Text Preprocessing Pipeline
+
+```
+Raw Text → Lowercase → Remove Punctuation → TF-IDF Vectorization → 1000-dim Vector
+```
+
+1. **Text Cleaning**: Convert to lowercase, remove special characters
+2. **TF-IDF Vectorization**: Transform text to numerical features (max 1000 features)
+3. **Model Inference**: Feed vector through neural network
+4. **Threshold**: Sigmoid output > 0.5 = Real, otherwise = Fake
 
 ## 🛠️ Tech Stack
 
-### Frontend
+### ML Backend (Python)
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Python** | 3.11 | Runtime |
+| **PyTorch** | 2.9.1 | Deep learning framework |
+| **FastAPI** | 0.115+ | REST API framework |
+| **scikit-learn** | 1.6+ | TF-IDF vectorization |
+| **Uvicorn** | 0.34+ | ASGI server |
+| **NumPy** | 2.2+ | Numerical computing |
+| **Pandas** | 2.2+ | Data manipulation |
+| **Matplotlib** | 3.10+ | Training visualization |
+
+### Frontend (TypeScript/React)
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **React** | 18.3 | UI framework |
+| **TypeScript** | 5.x | Type-safe JavaScript |
+| **Vite** | 5.x | Build tool |
+| **Tailwind CSS** | 3.x | Styling |
+| **shadcn/ui** | Latest | Component library |
+| **TanStack Query** | 5.x | Server state management |
+| **React Router** | 6.x | Client-side routing |
+
+### Backend Services
+
 | Technology | Purpose |
 |------------|---------|
-| **React 18** | UI Framework |
-| **TypeScript** | Type-safe JavaScript |
-| **Vite** | Build tool & dev server |
-| **Tailwind CSS** | Utility-first styling |
-| **shadcn/ui** | Component library |
-| **React Router** | Client-side routing |
-| **TanStack Query** | Server state management |
-| **Lucide React** | Icon library |
+| **Supabase** | Database & Authentication |
+| **PostgreSQL** | Data persistence |
+| **Deno** | Edge functions runtime |
 
-### Backend
-| Technology | Purpose |
-|------------|---------|
-| **Supabase** | Backend-as-a-Service |
-| **Deno** | Edge function runtime |
-| **PostgreSQL** | Database |
-| **Supabase Auth** | User authentication |
-| **Lovable AI** | AI Gateway (Gemini 2.5 Flash) |
+### Deployment
 
-### Legacy ML Service (Optional)
-| Technology | Purpose |
-|------------|---------|
-| **Python 3.11** | ML runtime |
-| **PyTorch** | Deep learning framework |
-| **FastAPI** | API framework |
-| **scikit-learn** | TF-IDF vectorization |
-
-## 🧠 Multi-Algorithm Analysis System
-
-The system employs **5 specialized AI algorithms** that analyze text from different perspectives:
-
-### 1. Factual Analysis
-- Verifiable claims and statistics
-- Named sources and citations
-- Logical consistency
-- Historical & scientific accuracy
-
-### 2. Linguistic Analysis
-- Sensationalist language patterns
-- Clickbait detection
-- Grammatical quality
-- Professional vs manipulative tone
-
-### 3. Sentiment & Bias Analysis
-- Political bias indicators
-- Emotional loading
-- One-sided presentation
-- Fear/anger/outrage triggers
-
-### 4. Source Credibility Analysis
-- Attribution to named sources
-- Expert credentials
-- Document/report citations
-- Journalistic standards
-
-### 5. Propaganda Detection
-- Appeal to authority/emotion/fear
-- Bandwagon effect
-- Card stacking (selective facts)
-- Name calling/labeling
-
-### Chain-of-Thought Synthesis
-All algorithm results are synthesized using chain-of-thought reasoning to produce:
-- Overall credibility score (0-1)
-- Confidence rating
-- Executive summary
-- Key concerns & strengths
-- Actionable recommendations
-
-## ✨ Features
-
-- **Multi-Algorithm Analysis** - 5 specialized AI perspectives
-- **Chain-of-Thought Reasoning** - Detailed synthesis with explanations
-- **Interactive Investigation Chat** - Ask follow-up questions about results
-- **Analysis History** - Track previous analyses (authenticated users)
-- **Batch Processing** - Analyze multiple articles
-- **Model Insights** - View system performance metrics
-- **Responsive Design** - Works on all devices
-- **Dark/Light Theme** - Automatic theme detection
+| Service | Purpose |
+|---------|---------|
+| **Hugging Face Spaces** | ML API hosting |
+| **Docker** | Containerization |
 
 ## 📁 Project Structure
 
 ```
-├── src/
+├── api/ml_service/              # ML Backend
+│   ├── app.py                   # FastAPI server
+│   ├── model.py                 # Neural network definition
+│   ├── train.py                 # Training script
+│   ├── config.py                # Configuration
+│   ├── download_data.py         # Dataset downloader
+│   ├── requirements.txt         # Python dependencies
+│   ├── Dockerfile               # Container config
+│   └── README.md                # ML service docs
+│
+├── models/                      # Trained artifacts
+│   ├── fake_news_model.pth      # PyTorch weights
+│   ├── tfidf_vectorizer.pkl     # Fitted TF-IDF
+│   ├── confusion_matrix.png     # Evaluation plot
+│   └── training_loss.png        # Training curve
+│
+├── src/                         # Frontend
 │   ├── components/
-│   │   ├── analysis/
-│   │   │   ├── AdvancedAnalyzer.tsx    # Main analysis component
-│   │   │   ├── AlgorithmCard.tsx       # Individual algorithm results
-│   │   │   ├── SynthesisCard.tsx       # Overall synthesis display
-│   │   │   └── InvestigationChat.tsx   # Interactive Q&A chat
-│   │   ├── ui/                         # shadcn/ui components
-│   │   └── ...
-│   ├── pages/
-│   │   ├── Index.tsx                   # Home page
-│   │   ├── History.tsx                 # Analysis history
-│   │   ├── Batch.tsx                   # Batch processing
-│   │   └── Insights.tsx                # Model insights
-│   ├── types/
-│   │   └── analysis.ts                 # TypeScript interfaces
-│   ├── integrations/
-│   │   └── supabase/                   # Supabase client & types
-│   └── lib/
-│       └── utils.ts                    # Utility functions
+│   │   ├── analysis/            # Analysis UI components
+│   │   └── ui/                  # shadcn components
+│   ├── pages/                   # Route pages
+│   ├── lib/api/
+│   │   └── misinformation.ts    # ML API client
+│   ├── types/                   # TypeScript interfaces
+│   └── integrations/supabase/   # Database client
+│
 ├── supabase/
-│   ├── functions/
-│   │   ├── analyze-news-advanced/      # Multi-algorithm analysis
-│   │   ├── investigate-chat/           # Interactive Q&A
-│   │   └── analyze-news/               # Legacy simple analysis
-│   └── config.toml                     # Supabase configuration
-├── api/
-│   └── ml_service/                     # Legacy PyTorch backend
-│       ├── app.py                      # FastAPI server
-│       ├── model.py                    # Neural network definition
-│       ├── train.py                    # Training script
-│       └── requirements.txt            # Python dependencies
-└── models/                             # Trained model artifacts
-    ├── fake_news_model.pth             # PyTorch weights
-    └── tfidf_vectorizer.pkl            # TF-IDF vectorizer
+│   ├── functions/               # Edge functions
+│   └── config.toml              # Supabase config
+│
+└── docs/                        # Documentation
+    ├── ARCHITECTURE.md
+    └── ML_INTEGRATION.md
 ```
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 18+
-- npm or bun
-
-### Installation
+### ML Backend Setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd <project-directory>
+cd api/ml_service
 
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Train the model (downloads dataset automatically)
+python train.py
+
+# Start API server
+python app.py
+```
+
+API available at `http://localhost:8000`
+
+### Frontend Setup
+
+```bash
 # Install dependencies
 npm install
 
-# Start development server
+# Start dev server
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080`
+App available at `http://localhost:8080`
 
-### Environment Variables
+## 📡 API Endpoints
 
-The following environment variables are automatically configured:
-- `VITE_SUPABASE_URL` - Supabase project URL
-- `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase anon key
-
-## 📊 Model Performance
-
-### Current AI System (Lovable AI + Gemini)
-- **Model**: Google Gemini 2.5 Flash
-- **Approach**: Multi-perspective LLM analysis
-- **Latency**: ~3-5 seconds for full analysis
-- **Accuracy**: Context-dependent, high reasoning capability
-
-### Legacy PyTorch Model
-- **Architecture**: 2-layer neural network (1000 → 64 → 1)
-- **Input**: TF-IDF vectors (max 1000 features)
-- **Output**: Binary classification (fake/real)
-- **Accuracy**: ~67.5% on test set
-- **Inference**: <50ms
-
-## 🔒 Security
-
-- Row Level Security (RLS) on all database tables
-- User authentication via Supabase Auth
-- API keys secured as environment secrets
-- CORS configured for allowed origins
-
-## 📚 API Reference
-
-### Analyze News (Advanced)
+### Health Check
 ```bash
-POST /functions/v1/analyze-news-advanced
+GET /health
+
+Response:
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "device": "cpu"
+}
+```
+
+### Single Prediction
+```bash
+POST /predict
 Content-Type: application/json
 
 {
   "text": "News article text to analyze..."
 }
+
+Response:
+{
+  "prediction": "fake",
+  "confidence": 0.87,
+  "raw_score": 0.13
+}
 ```
 
-### Investigation Chat
+### Batch Prediction
 ```bash
-POST /functions/v1/investigate-chat
+POST /batch_predict
 Content-Type: application/json
 
 {
-  "text": "Original article text",
-  "analyses": { /* Previous analysis results */ },
-  "synthesis": { /* Synthesis results */ },
-  "question": "Why is this considered misinformation?"
+  "texts": ["Article 1...", "Article 2..."]
+}
+
+Response:
+{
+  "results": [
+    {"prediction": "fake", "confidence": 0.87, "raw_score": 0.13},
+    {"prediction": "real", "confidence": 0.92, "raw_score": 0.92}
+  ]
 }
 ```
+
+## 📊 Dataset
+
+The model is trained on the **Fake and Real News Dataset** from Kaggle:
+- ~44,000 articles total
+- Binary labels: Fake (0) / Real (1)
+- Features: Title + Text content
+
+Dataset download requires Kaggle API credentials:
+1. Create account at [kaggle.com](https://www.kaggle.com)
+2. Go to Account → API → Create New Token
+3. Save `kaggle.json` to `~/.kaggle/kaggle.json`
+
+## 🐳 Docker Deployment
+
+```bash
+cd api/ml_service
+
+# Build image
+docker build -t misinformation-detector .
+
+# Run container
+docker run -p 8000:8000 misinformation-detector
+```
+
+## 🔧 Environment Variables
+
+### ML Backend
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `API_HOST` | 0.0.0.0 | Server host |
+| `API_PORT` | 8000 | Server port |
+| `CORS_ORIGINS` | localhost:5173,3000 | Allowed origins |
+
+### Frontend
+| Variable | Description |
+|----------|-------------|
+| `VITE_ML_API_URL` | ML backend URL |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase anon key |
+
+## 📈 Training Visualization
+
+The training script generates:
+- `models/training_loss.png` - Loss curve over epochs
+- `models/confusion_matrix.png` - Test set evaluation
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/improvement`)
+3. Commit changes (`git commit -m 'Add improvement'`)
+4. Push to branch (`git push origin feature/improvement`)
+5. Open Pull Request
 
 ## 📄 License
 
-This project is part of an academic research initiative for misinformation detection.
-
-## 🙏 Acknowledgments
-
-- [Lovable](https://lovable.dev) - AI-powered development platform
-- [Supabase](https://supabase.com) - Backend infrastructure
-- [shadcn/ui](https://ui.shadcn.com) - UI components
-- [Google Gemini](https://deepmind.google/technologies/gemini/) - AI model
+Academic research project for misinformation detection.
