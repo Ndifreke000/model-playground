@@ -1,145 +1,280 @@
-# Misinformation Detection ML Service
+# AI News Detector - Misinformation Analysis System
 
-This service provides an API for detecting fake news using a PyTorch-based machine learning model extracted from the Jupyter notebook.
+A sophisticated misinformation detection platform using multi-algorithm AI analysis with chain-of-thought reasoning and interactive investigation capabilities.
 
-## Quick Start
+## 🚀 Live Demo
 
-### 1. Install Dependencies
+**Frontend:** Deployed on Lovable  
+**Backend API:** `https://yosemite000-misinformation-detector.hf.space` (Legacy PyTorch model)
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTEND                                  │
+│                   React + TypeScript + Tailwind                  │
+│                                                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
+│  │   Index     │  │   History   │  │   Insights              │  │
+│  │   Page      │  │   Page      │  │   Page                  │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────────┘  │
+│         │                │                     │                 │
+│         └────────────────┼─────────────────────┘                 │
+│                          │                                       │
+│              ┌───────────▼───────────┐                          │
+│              │  AdvancedAnalyzer     │                          │
+│              │  Component            │                          │
+│              └───────────┬───────────┘                          │
+└──────────────────────────┼──────────────────────────────────────┘
+                           │
+┌──────────────────────────▼──────────────────────────────────────┐
+│                    BACKEND (Supabase)                            │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              Edge Functions (Deno/TypeScript)            │    │
+│  │                                                          │    │
+│  │  ┌──────────────────┐  ┌──────────────────────────────┐ │    │
+│  │  │ analyze-news-    │  │ investigate-chat             │ │    │
+│  │  │ advanced         │  │                              │ │    │
+│  │  │                  │  │ Interactive Q&A about        │ │    │
+│  │  │ 5 AI Algorithms: │  │ analysis results             │ │    │
+│  │  │ • Factual        │  └──────────────────────────────┘ │    │
+│  │  │ • Linguistic     │                                   │    │
+│  │  │ • Sentiment      │  ┌──────────────────────────────┐ │    │
+│  │  │ • Source         │  │ analyze-news (legacy)        │ │    │
+│  │  │ • Propaganda     │  │ Simple single-pass analysis  │ │    │
+│  │  │                  │  └──────────────────────────────┘ │    │
+│  │  │ + Synthesis      │                                   │    │
+│  │  └──────────────────┘                                   │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              Lovable AI Gateway                          │    │
+│  │              (Google Gemini 2.5 Flash)                   │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              PostgreSQL Database                         │    │
+│  │              • analysis_history table                    │    │
+│  │              • User authentication (Supabase Auth)       │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+## 🛠️ Tech Stack
+
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| **React 18** | UI Framework |
+| **TypeScript** | Type-safe JavaScript |
+| **Vite** | Build tool & dev server |
+| **Tailwind CSS** | Utility-first styling |
+| **shadcn/ui** | Component library |
+| **React Router** | Client-side routing |
+| **TanStack Query** | Server state management |
+| **Lucide React** | Icon library |
+
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| **Supabase** | Backend-as-a-Service |
+| **Deno** | Edge function runtime |
+| **PostgreSQL** | Database |
+| **Supabase Auth** | User authentication |
+| **Lovable AI** | AI Gateway (Gemini 2.5 Flash) |
+
+### Legacy ML Service (Optional)
+| Technology | Purpose |
+|------------|---------|
+| **Python 3.11** | ML runtime |
+| **PyTorch** | Deep learning framework |
+| **FastAPI** | API framework |
+| **scikit-learn** | TF-IDF vectorization |
+
+## 🧠 Multi-Algorithm Analysis System
+
+The system employs **5 specialized AI algorithms** that analyze text from different perspectives:
+
+### 1. Factual Analysis
+- Verifiable claims and statistics
+- Named sources and citations
+- Logical consistency
+- Historical & scientific accuracy
+
+### 2. Linguistic Analysis
+- Sensationalist language patterns
+- Clickbait detection
+- Grammatical quality
+- Professional vs manipulative tone
+
+### 3. Sentiment & Bias Analysis
+- Political bias indicators
+- Emotional loading
+- One-sided presentation
+- Fear/anger/outrage triggers
+
+### 4. Source Credibility Analysis
+- Attribution to named sources
+- Expert credentials
+- Document/report citations
+- Journalistic standards
+
+### 5. Propaganda Detection
+- Appeal to authority/emotion/fear
+- Bandwagon effect
+- Card stacking (selective facts)
+- Name calling/labeling
+
+### Chain-of-Thought Synthesis
+All algorithm results are synthesized using chain-of-thought reasoning to produce:
+- Overall credibility score (0-1)
+- Confidence rating
+- Executive summary
+- Key concerns & strengths
+- Actionable recommendations
+
+## ✨ Features
+
+- **Multi-Algorithm Analysis** - 5 specialized AI perspectives
+- **Chain-of-Thought Reasoning** - Detailed synthesis with explanations
+- **Interactive Investigation Chat** - Ask follow-up questions about results
+- **Analysis History** - Track previous analyses (authenticated users)
+- **Batch Processing** - Analyze multiple articles
+- **Model Insights** - View system performance metrics
+- **Responsive Design** - Works on all devices
+- **Dark/Light Theme** - Automatic theme detection
+
+## 📁 Project Structure
+
+```
+├── src/
+│   ├── components/
+│   │   ├── analysis/
+│   │   │   ├── AdvancedAnalyzer.tsx    # Main analysis component
+│   │   │   ├── AlgorithmCard.tsx       # Individual algorithm results
+│   │   │   ├── SynthesisCard.tsx       # Overall synthesis display
+│   │   │   └── InvestigationChat.tsx   # Interactive Q&A chat
+│   │   ├── ui/                         # shadcn/ui components
+│   │   └── ...
+│   ├── pages/
+│   │   ├── Index.tsx                   # Home page
+│   │   ├── History.tsx                 # Analysis history
+│   │   ├── Batch.tsx                   # Batch processing
+│   │   └── Insights.tsx                # Model insights
+│   ├── types/
+│   │   └── analysis.ts                 # TypeScript interfaces
+│   ├── integrations/
+│   │   └── supabase/                   # Supabase client & types
+│   └── lib/
+│       └── utils.ts                    # Utility functions
+├── supabase/
+│   ├── functions/
+│   │   ├── analyze-news-advanced/      # Multi-algorithm analysis
+│   │   ├── investigate-chat/           # Interactive Q&A
+│   │   └── analyze-news/               # Legacy simple analysis
+│   └── config.toml                     # Supabase configuration
+├── api/
+│   └── ml_service/                     # Legacy PyTorch backend
+│       ├── app.py                      # FastAPI server
+│       ├── model.py                    # Neural network definition
+│       ├── train.py                    # Training script
+│       └── requirements.txt            # Python dependencies
+└── models/                             # Trained model artifacts
+    ├── fake_news_model.pth             # PyTorch weights
+    └── tfidf_vectorizer.pkl            # TF-IDF vectorizer
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or bun
+
+### Installation
 
 ```bash
-cd api/ml_service
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+# Clone the repository
+git clone <repository-url>
+cd <project-directory>
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-### 2. Prepare Data
+The app will be available at `http://localhost:8080`
 
-The dataset will be **automatically downloaded** using kagglehub when you run training:
+### Environment Variables
 
-```bash
-python train.py  # Downloads dataset automatically!
-```
+The following environment variables are automatically configured:
+- `VITE_SUPABASE_URL` - Supabase project URL
+- `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase anon key
 
-**Alternative: Manual download** (optional)
-```bash
-python download_data.py  # Download separately first
-```
+## 📊 Model Performance
 
-**Kaggle Credentials Required:**
-- Create account at [kaggle.com](https://www.kaggle.com)
-- Go to Account → API → Create New Token
-- Save `kaggle.json` to `~/.kaggle/kaggle.json`
-- Set permissions: `chmod 600 ~/.kaggle/kaggle.json`
+### Current AI System (Lovable AI + Gemini)
+- **Model**: Google Gemini 2.5 Flash
+- **Approach**: Multi-perspective LLM analysis
+- **Latency**: ~3-5 seconds for full analysis
+- **Accuracy**: Context-dependent, high reasoning capability
 
-More info: [Kaggle API Docs](https://www.kaggle.com/docs/api)
-
-### 3. Train the Model
-
-```bash
-python train.py
-```
-
-This will:
-- Load and preprocess the dataset
-- Train the model for 10 epochs
-- Save model weights to `models/fake_news_model.pth`
-- Save vectorizer to `models/tfidf_vectorizer.pkl`
-- Generate training plots
-
-### 4. Start the API Server
-
-```bash
-python app.py
-# Or using uvicorn directly:
-uvicorn app:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at `http://localhost:8000`
-
-## 🚀 Live Deployment
-
-**API URL:** `https://yosemite000-misinformation-detector.hf.space`
-
-You can test the live API directly using the endpoints below.
-
-## API Endpoints
-
-### Health Check
-```bash
-GET /health
-```
-
-### Single Prediction
-```bash
-POST /predict
-Content-Type: application/json
-
-{
-  "text": "Your news article text here..."
-}
-```
-
-Response:
-```json
-{
-  "prediction": "fake",
-  "confidence": 0.87,
-  "raw_score": 0.13
-}
-```
-
-### Batch Prediction
-```bash
-POST /batch_predict
-Content-Type: application/json
-
-{
-  "texts": [
-    "First article...",
-    "Second article..."
-  ]
-}
-```
-
-## Testing
-
-Test the API with curl:
-
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Single prediction
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Breaking news: Scientists discover..."}'
-```
-
-## Model Details
-
+### Legacy PyTorch Model
 - **Architecture**: 2-layer neural network (1000 → 64 → 1)
 - **Input**: TF-IDF vectors (max 1000 features)
 - **Output**: Binary classification (fake/real)
 - **Accuracy**: ~67.5% on test set
-- **Framework**: PyTorch 2.9.1
+- **Inference**: <50ms
 
-## Environment Variables
+## 🔒 Security
 
-- `API_HOST`: Server host (default: 0.0.0.0)
-- `API_PORT`: Server port (default: 8000)
-- `CORS_ORIGINS`: Allowed origins (default: localhost:5173,3000)
+- Row Level Security (RLS) on all database tables
+- User authentication via Supabase Auth
+- API keys secured as environment secrets
+- CORS configured for allowed origins
 
-## Troubleshooting
+## 📚 API Reference
 
-**Model not found error:**
-- Ensure you've run `python train.py` first
-- Check that `models/` directory contains .pth and .pkl files
+### Analyze News (Advanced)
+```bash
+POST /functions/v1/analyze-news-advanced
+Content-Type: application/json
 
-**CUDA errors:**
-- The model automatically falls back to CPU if CUDA is unavailable
-- Check with: `python -c "import torch; print(torch.cuda.is_available())"`
+{
+  "text": "News article text to analyze..."
+}
+```
 
-**Import errors:**
-- Activate virtual environment: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
+### Investigation Chat
+```bash
+POST /functions/v1/investigate-chat
+Content-Type: application/json
+
+{
+  "text": "Original article text",
+  "analyses": { /* Previous analysis results */ },
+  "synthesis": { /* Synthesis results */ },
+  "question": "Why is this considered misinformation?"
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is part of an academic research initiative for misinformation detection.
+
+## 🙏 Acknowledgments
+
+- [Lovable](https://lovable.dev) - AI-powered development platform
+- [Supabase](https://supabase.com) - Backend infrastructure
+- [shadcn/ui](https://ui.shadcn.com) - UI components
+- [Google Gemini](https://deepmind.google/technologies/gemini/) - AI model
