@@ -1,4 +1,4 @@
-import { TextAnalyzer } from "@/components/TextAnalyzer";
+import { AdvancedAnalyzer } from "@/components/analysis/AdvancedAnalyzer";
 import { Shield, Brain, History, LogOut, Menu } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,7 +168,7 @@ const Index = () => {
         </div>
 
         {/* Analyzer */}
-        <TextAnalyzer />
+        <AdvancedAnalyzer />
       </main>
 
       {/* Footer */}

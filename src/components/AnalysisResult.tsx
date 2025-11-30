@@ -113,7 +113,7 @@ export const AnalysisResult = ({
       <Card className="p-6 bg-accent/30 border-accent">
         <h4 className="font-semibold text-accent-foreground mb-2">Important Notice</h4>
         <p className="text-sm text-accent-foreground/80">
-          This is an AI-powered prediction tool trained for Nigerian news context. Always verify information through multiple 
+          This is an AI-powered prediction tool. Always verify information through multiple 
           trusted sources before drawing conclusions. No automated system is 100% accurate.
         </p>
       </Card>
