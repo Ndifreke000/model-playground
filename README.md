@@ -143,14 +143,39 @@ Raw Text → Lowercase → Remove Punctuation → TF-IDF Vectorization → 1000-
 
 ## 🚀 Getting Started
 
-### ML Backend Setup
+### Prerequisites
+
+- Node.js 18+ and npm
+- For ML development only: Python 3.11+
+
+### Frontend Development
+
+```bash
+# Install dependencies
+npm install
+
+# Configure environment variables
+# Create .env file with:
+# VITE_ML_API_URL=https://yosemite000-misinformation-detector.hf.space
+# VITE_SUPABASE_URL=your_supabase_url
+# VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_key
+
+# Start dev server
+npm run dev
+```
+
+App available at `http://localhost:8080`
+
+### ML Backend Development (Optional)
+
+> **Note:** The ML API is already deployed to Hugging Face Spaces. You only need to run this locally if you're developing new ML features.
 
 ```bash
 cd api/ml_service
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -158,23 +183,36 @@ pip install -r requirements.txt
 # Train the model (downloads dataset automatically)
 python train.py
 
-# Start API server
+# Start API server (local testing only)
 python app.py
 ```
 
-API available at `http://localhost:8000`
+Local API available at `http://localhost:8000`
 
-### Frontend Setup
+## 🌐 Deployment
+
+### Current Architecture
+
+| Component | Platform | URL |
+|-----------|----------|-----|
+| **Frontend** | Vercel (Ready to deploy) | TBD |
+| **ML API** | Hugging Face Spaces | https://yosemite000-misinformation-detector.hf.space |
+| **Database** | Supabase | Configured |
+
+### Deploy Frontend to Vercel
 
 ```bash
-# Install dependencies
-npm install
+# Install Vercel CLI
+npm i -g vercel
 
-# Start dev server
-npm run dev
+# Deploy to production
+vercel --prod
+
+# Set environment variable in Vercel dashboard:
+# VITE_ML_API_URL=https://yosemite000-misinformation-detector.hf.space
 ```
 
-App available at `http://localhost:8080`
+The ML backend is already live on Hugging Face Spaces. See [DEPLOYMENT.md](./DEPLOYMENT.md) for details.
 
 ## 📡 API Endpoints
 
@@ -239,13 +277,15 @@ Dataset download requires Kaggle API credentials:
 
 ## 🐳 Docker Deployment
 
+> **Note:** The ML service is already deployed to Hugging Face Spaces using Docker. This section is for reference only.
+
 ```bash
 cd api/ml_service
 
 # Build image
 docker build -t misinformation-detector .
 
-# Run container
+# Run container locally
 docker run -p 8000:8000 misinformation-detector
 ```
 

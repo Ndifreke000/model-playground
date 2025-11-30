@@ -6,7 +6,28 @@ This guide covers how to deploy the Misinformation Detection ML Service to vario
 
 ## 🤗 Hugging Face Spaces (Recommended for ML)
 
+> [!NOTE]
+> **Status:** ✅ **DEPLOYED AND LIVE**
+> 
+> The ML API is currently running on Hugging Face Spaces at:
+> **https://yosemite000-misinformation-detector.hf.space**
+
 Hugging Face Spaces is optimized for deploying machine learning models with excellent support for Docker-based deployments.
+
+### Testing the Live Deployment
+
+```bash
+# Health check
+curl https://yosemite000-misinformation-detector.hf.space/health
+
+# Make a prediction
+curl -X POST "https://yosemite000-misinformation-detector.hf.space/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "This is a sample news article to test the API..."}'
+```
+
+### Redeploying (If Needed)
+
 
 ### Prerequisites
 - A Hugging Face account ([sign up here](https://huggingface.co/join))
@@ -83,12 +104,11 @@ git commit -m "Initial deployment"
 git push
 ```
 
-### Step 6: Monitor Deployment
+### Step 6: Monitor the Space
 
-1. Go to your Space page: `https://huggingface.co/spaces/YOUR_USERNAME/misinformation-detector`
-2. The Space will automatically build the Docker image
-3. Wait for the status to change from "Building" → "Running" (2-5 minutes)
-4. Your API will be live at: `https://YOUR_USERNAME-misinformation-detector.hf.space`
+1. Visit your Space page: `https://huggingface.co/spaces/yosemite000/misinformation-detector`
+2. Check the logs in the "Logs" tab for any errors
+3. Status should show "Running" with a green indicator
 
 ### Testing Your Deployment
 

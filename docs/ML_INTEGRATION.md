@@ -2,31 +2,49 @@
 
 ## Overview
 
-The fake news detection model from `Misinformation for fake.ipynb` has been integrated into the application with a Python FastAPI backend and React frontend.
+The fake news detection model has been integrated into the application with a Python FastAPI backend deployed to **Hugging Face Spaces** and a React frontend.
 
 ## Architecture
 
 ```
-┌─────────────────┐         ┌──────────────────┐         ┌───────────────┐
-│  React Frontend │ ──HTTP──▶│  FastAPI Backend │ ──────▶│  PyTorch Model│
-│  (TypeScript)   │  POST   │    (Python)      │  Loads │   + TF-IDF    │
-└─────────────────┘         └──────────────────┘         └───────────────┘
+┌─────────────────┐         ┌──────────────────────┐         ┌───────────────┐
+│  React Frontend │ ──HTTP──▶│  FastAPI Backend     │ ──────▶│  PyTorch Model│
+│  (TypeScript)   │  POST   │  (Hugging Face)      │  Loads │   + TF-IDF    │
+│   on Vercel     │         │   Docker Container   │        └───────────────┘
+└─────────────────┘         └──────────────────────┘
         │                            │
         ▼                            ▼
-  shadcn/ui Components        Model Weights (.pth)
-  API Client                  Vectorizer (.pkl)
+  shadcn/ui Components         Model Weights (.pth)
+  API Client                   Vectorizer (.pkl)
+
+Production URL: https://yosemite000-misinformation-detector.hf.space
 ```
 
 ## Quick Start
 
-### 1. Set Up Python Backend
+### 1. Frontend Setup
+
+The `.env` file should contain:
+```bash
+VITE_ML_API_URL="https://yosemite000-misinformation-detector.hf.space"
+VITE_SUPABASE_URL="your_supabase_url"
+VITE_SUPABASE_PUBLISHABLE_KEY="your_supabase_key"
+```
+
+### 2. Access the Feature
+
+Visit `/misinformation` route in your application to use the detector. The API calls will automatically route to the Hugging Face Spaces deployment.
+
+### 3. Local ML Backend Setup (Optional - For Development Only)
+
+> **Note:** The ML API is already deployed to Hugging Face Spaces. You only need this if you're developing new ML features.
 
 ```bash
 cd api/ml_service
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -40,20 +58,9 @@ pip install -r requirements.txt
 # Train the model
 python train.py
 
-# Start the API server
+# Start the API server (for local testing)
 python app.py
 ```
-
-### 2. Configure Frontend
-
-The `.env` file has been updated with:
-```bash
-VITE_ML_API_URL="http://localhost:8000"
-```
-
-### 3. Access the Feature
-
-Visit `/misinformation` route in your application to use the detector.
 
 ## File Structure
 
@@ -82,14 +89,18 @@ model-playground/
 
 ## API Endpoints
 
+### Production Endpoints
+
+Base URL: `https://yosemite000-misinformation-detector.hf.space`
+
 ### Health Check
 ```bash
-GET http://localhost:8000/health
+GET https://yosemite000-misinformation-detector.hf.space/health
 ```
 
 ### Single Prediction
 ```bash
-POST http://localhost:8000/predict
+POST https://yosemite000-misinformation-detector.hf.space/predict
 Content-Type: application/json
 
 {
@@ -106,7 +117,7 @@ Content-Type: application/json
 
 ### Batch Prediction
 ```bash
-POST http://localhost:8000/batch_predict
+POST https://yosemite000-misinformation-detector.hf.space/batch_predict
 Content-Type: application/json
 
 {
@@ -145,49 +156,20 @@ curl -X POST http://localhost:8000/predict \
 
 ## Deployment
 
-### Option 1: Docker
+> [!NOTE]
+> **The ML service is already deployed to Hugging Face Spaces!**
+> 
+> URL: https://yosemite000-misinformation-detector.hf.space
 
-Create `api/ml_service/Dockerfile`:
-```dockerfile
-FROM python:3.12-slim
+For detailed deployment instructions and redeployment steps, see [DEPLOYMENT.md](../DEPLOYMENT.md).
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+### Quick Reference
 
-COPY . .
-
-EXPOSE 8000
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Build and run:
-```bash
-docker build -t ml-service api/ml_service
-docker run -p 8000:8000 ml-service
-```
-
-### Option 2: Serverless (AWS Lambda)
-
-Use `mangum` adapter for FastAPI:
-```bash
-pip install mangum
-```
-
-Add to `app.py`:
-```python
-from mangum import Mangum
-handler = Mangum(app)
-```
-
-### Option 3: Cloud Run (Google Cloud)
-
-```bash
-gcloud run deploy ml-service \
-  --source api/ml_service \
-  --region us-central1 \
-  --allow-unauthenticated
-```
+The ML service is containerized using Docker and deployed to Hugging Face Spaces. The deployment includes:
+- FastAPI backend
+- PyTorch model weights
+- TF-IDF vectorizer
+- CORS configuration for frontend access
 
 ## Troubleshooting
 

@@ -1,106 +1,108 @@
 # Vercel Deployment Guide
 
-## ⚠️ Important: Recommended Deployment Strategy
+## ✅ Hybrid Deployment Architecture (Implemented)
 
-**For ML-Heavy Applications, we recommend a Hybrid Approach:**
+**Current Setup:**
 
-1. **Frontend:** Deploy to Vercel (fast, free, auto-deploys from GitHub)
-2. **ML Backend:** Deploy to [Railway](https://railway.app) or [Render](https://render.com)
+| Component | Platform | Status |
+|-----------|----------|--------|
+| **Frontend** | Vercel | Ready to deploy |
+| **ML Backend** | Hugging Face Spaces | ✅ Deployed and Live |
+| **Database** | Supabase | ✅ Configured |
 
-**Why?**
-- Vercel serverless functions have limitations for ML workloads:
-  - 250MB deployment size limit (PyTorch with CUDA is ~800MB)
-  - 10-second timeout on free tier
-  - Cold starts can be slow for model loading
-- Railway/Render support persistent containers perfect for ML services
+**ML API URL:** `https://yosemite000-misinformation-detector.hf.space`
 
-**Quick Railway Deployment (Recommended):**
+## Why This Architecture?
+
+This hybrid approach provides the best of both platforms:
+
+**Vercel (Frontend):**
+- ✅ Instant deployments from GitHub
+- ✅ Global CDN for fast page loads
+- ✅ Automatic HTTPS and custom domains
+- ✅ Free tier for unlimited static sites
+
+**Hugging Face Spaces (ML Backend):**
+- ✅ Optimized for ML model hosting
+- ✅ No 250MB deployment size limits
+- ✅ Persistent Docker containers
+- ✅ Long-running inference workloads
+- ✅ Already deployed and tested
+
+---
+
+## Deploying Frontend to Vercel
+
+### Prerequisites
+
+1. A [Vercel account](https://vercel.com/signup) (free tier works)
+2. Vercel CLI installed: `npm i -g vercel`
+3. The project pushed to GitHub (recommended) or deploy from local
+
+### Option 1: Deploy from GitHub (Recommended)
+
+1. **Push to GitHub** (if not already done):
+   ```bash
+   git add .
+   git commit -m "Ready for Vercel deployment"
+   git push origin main
+   ```
+
+2. **Connect to Vercel**:
+   - Go to [vercel.com/new](https://vercel.com/new)
+   - Click "Import Git Repository"
+   - Select your `model-playground` repository
+   - Framework Preset: **Vite** (should auto-detect)
+   - Root Directory: `./` (keep default)
+   - Click **Deploy**
+
+3. **Set Environment Variables**:
+   
+   In Vercel Dashboard → Settings → Environment Variables, add:
+   
+   ```
+   VITE_ML_API_URL=https://yosemite000-misinformation-detector.hf.space
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_key_here
+   ```
+
+4. **Redeploy** after adding environment variables:
+   - Go to Deployments tab
+   - Click "Redeploy" on the latest deployment
+
+### Option 2: Deploy from CLI
+
 ```bash
-# Install Railway CLI
-npm i -g @railway/cli
+# From project root
+vercel login
 
-# Deploy backend
-cd api/ml_service
-railway login
-railway init
-railway up
-
-# Get your backend URL (e.g., https://your-service.railway.app)
-# Copy it for the next step
-```
-
-Then deploy frontend to Vercel with:
-```bash
+# Deploy to production
 vercel --prod
-# Set environment variable: VITE_ML_API_URL=https://your-service.railway.app
+
+# You'll be prompted to enter project details
+# Set environment variables in Vercel dashboard afterwards
 ```
 
 ---
 
-## Vercel-Only Deployment (Experimental)
+## Verification
 
-If you still want to deploy everything to Vercel, continue below. Note: This may hit size limits or timeout issues.
+### 1. Test Frontend
+Visit your Vercel deployment URL (e.g., `https://model-playground.vercel.app`)
 
-## Prerequisites
+### 2. Test ML Integration
+1. Navigate to `/misinformation` route
+2. Enter sample text
+3. Click "Analyze Text"
+4. Verify prediction results appear
 
-1. A [Vercel account](https://vercel.com/signup) (free tier works)
-2. Vercel CLI installed: `npm i -g vercel`
-3. The project pushed to GitHub
-
-## Architecture
-
+### 3. Check API Connection
+Open browser DevTools → Network tab and verify requests are going to:
 ```
-Vercel Deployment
-├── Frontend (Static + SPA) ➔ https://your-app.vercel.app
-└── Backend (Serverless Functions) ➔ https://your-app.vercel.app/api/*
-```
-
-## Deployment Steps
-
-### 1. Install Vercel CLI
-
-```bash
-npm install -g vercel
+https://yosemite000-misinformation-detector.hf.space/predict
 ```
 
-### 2. Login to Vercel
-
-```bash
-vercel login
-```
-
-### 3. Deploy from Local
-
-```bash
-# From project root
-vercel
-
-# Follow prompts:
-# - Set up and deploy? Y
-# - Which scope? (your account)
-# - Link to existing project? N
-# - Project name? model-playground
-# - Directory? ./
-# - Override settings? N
-```
-
-### 4. Set Environment Variables
-
-In your Vercel dashboard:
-1. Go to your project → Settings → Environment Variables
-2. Add these variables:
-
-```
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your_key_here
-VITE_ML_API_URL=https://your-app.vercel.app/api
-```
-
-### 5. Deploy to Production
-
-```bash
-vercel --prod
-```
+---
 
 ## Configuration Files
 
@@ -108,128 +110,85 @@ vercel --prod
 
 The project includes a `vercel.json` that configures:
 - **Frontend:** Built with Vite, served as static files
-- **Backend:** Python functions at `/api/*` route
+- **API Folder:** Ignored (since ML backend is on Hugging Face)
+- **Rewrites:** SPA routing to `index.html`
 
-### `api/index.py`
-
-This is the **serverless handler** that wraps the FastAPI app using Mangum adapter.
-
-## Important Notes
-
-### Model Files
-
-**Issue:** Vercel has a 250MB deployment limit, but our model is small (~300KB), so it's fine.
-
-**For larger models:**
-1. Host model on Hugging Face Hub
-2. Update `model.py` to download from HF on cold start:
-
-```python
-from huggingface_hub import hf_hub_download
-
-model_path = hf_hub_download(
-    repo_id="your-username/fake-news-model",
-    filename="fake_news_model.pth"
-)
-```
-
-### Cold Starts
-
-Serverless functions "wake up" on first request, causing ~2-5 second delays. Subsequent requests are fast.
-
-**Mitigation:**
-- Use Vercel's Edge Functions (if your model is small enough)
-- Implement caching for predictions
-- Add a "warming" endpoint that gets pinged periodically
-
-### CORS
-
-The backend's CORS settings in `config.py` should include your Vercel domain:
-
-```python
-CORS_ORIGINS = [
-    "https://your-app.vercel.app",
-    "http://localhost:8080"
-]
-```
-
-## Vercel Dashboard
-
-After deployment, visit:
-```
-https://vercel.com/your-username/model-playground
-```
-
-You can:
-- View deployments
-- Check logs
-- Set environment variables
-- Configure custom domains
-
-## Testing the Deployed App
-
-1. **Frontend:** Visit `https://your-app.vercel.app`
-2. **Backend API:** Visit `https://your-app.vercel.app/api/health`
-
-Expected response:
 ```json
 {
-  "status": "healthy",
-  "model_loaded": true,
-  "device": "cpu"
+  "buildCommand": "npm run build",
+  "framework": "vite",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "ignores": [
+    "api/**",
+    "*.md",
+    "*.ipynb"
+  ]
 }
 ```
 
+---
+
 ## Troubleshooting
 
-### Build Fails
+### Build Fails on Vercel
 
-**Error:** "PyTorch too large"
-**Solution:** Use the CPU-only version (already configured in `requirements.txt`)
+**Error:** "Build failed" or TypeScript errors
 
-### API Returns 500
-
-**Error:** Model not found
-**Solution:** 
-1. Check that `models/` directory is included in deployment
-2. Or switch to Hugging Face Hub hosting
-
-### Cold Start Timeout
-
-**Error:** Function timeout after 10s
 **Solution:**
-1. Upgrade to Vercel Pro (60s timeout)
-2. Or host the ML backend on Railway/Render (see below)
+1. Verify build works locally: `npm run build`
+2. Check that all dependencies are in `package.json` (not just `devDependencies`)
+3. Review build logs in Vercel dashboard
 
-## Alternative: Hybrid Deployment
+### ML API Not Responding
 
-If Vercel serverless is too limiting for the ML model:
+**Error:** Network error or timeout when testing misinformation detection
 
-1. **Frontend:** Deploy to Vercel (as above)
-2. **Backend:** Deploy to [Railway](https://railway.app) or [Render](https://render.com)
-   - These support long-running containers
-   - Update `VITE_ML_API_URL` to point to Railway/Render URL
+**Solution:**
+1. Verify `VITE_ML_API_URL` environment variable is set correctly in Vercel
+2. Test HF Spaces directly:
+   ```bash
+   curl https://yosemite000-misinformation-detector.hf.space/health
+   ```
+3. Check browser console for CORS errors
+4. Redeploy after updating environment variables
 
-### Railway Deployment (Backend only)
+### Environment Variables Not Working
 
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
+**Issue:** App can't connect to Supabase or ML API
 
-# Login and deploy
-railway login
-railway init
-railway up
-```
+**Solution:**
+1. Environment variables must be prefixed with `VITE_` for Vite projects
+2. After adding/changing env vars in Vercel, you must **redeploy**
+3. Check the deployment logs to see which env vars were detected
 
-Railway will auto-detect the Python backend and deploy it as a persistent service.
+### Custom Domain Issues
+
+**Issue:** Custom domain not working
+
+**Solution:**
+1. Add domain in Vercel Dashboard → Settings → Domains
+2. Update DNS records as instructed by Vercel
+3. Wait for DNS propagation (can take up to 48 hours)
+
+---
 
 ## CI/CD with GitHub
 
-Vercel automatically deploys on every push to `main`. Check the "Deployments" tab in your dashboard to see build status.
+Once connected to GitHub, Vercel automatically:
+- ✅ Deploys every push to `main` branch (production)
+- ✅ Creates preview deployments for pull requests
+- ✅ Runs build checks before deploying
+
+Check the "Git" section in Vercel dashboard to configure branch deployments.
 
 ---
 
 **Ready to deploy!** 🚀
 
-Run `vercel --prod` and share your live link!
+The ML backend is already live on Hugging Face. Deploy your frontend with `vercel --prod` or connect your GitHub repository!
