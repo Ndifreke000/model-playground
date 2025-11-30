@@ -12,10 +12,5 @@
     ],
     "env": {
         "VITE_ML_API_URL": "@ml_api_url"
-    },
-    "ignores": [
-        "api/**",
-        "*.md",
-        "*.ipynb"
-    ]
+    }
 }
