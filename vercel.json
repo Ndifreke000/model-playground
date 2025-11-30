@@ -9,8 +9,5 @@
             "source": "/(.*)",
             "destination": "/index.html"
         }
-    ],
-    "env": {
-        "VITE_ML_API_URL": "@ml_api_url"
-    }
+    ]
 }
