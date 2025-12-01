@@ -22,6 +22,14 @@ export interface AnalysisSynthesis {
   detailed_reasoning: string;
 }
 
+export interface MLModelResult {
+  prediction: 'fake' | 'real';
+  confidence: number;
+  raw_score: number;
+  model_version?: string;
+  processing_time_ms?: number;
+}
+
 export interface AdvancedAnalysisResult {
   analyses: {
     factual: AlgorithmResult;
@@ -31,10 +39,27 @@ export interface AdvancedAnalysisResult {
     propaganda: AlgorithmResult;
   };
   synthesis: AnalysisSynthesis;
+  mlModel?: MLModelResult;
   timestamp: string;
 }
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+}
+
+export interface ModelMetrics {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1_score: number;
+  total_samples: number;
+  last_trained: string;
+}
+
+export interface RetrainingStatus {
+  status: 'idle' | 'preparing' | 'training' | 'evaluating' | 'complete' | 'error';
+  progress: number;
+  message: string;
+  metrics?: ModelMetrics;
 }
