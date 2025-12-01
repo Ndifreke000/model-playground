@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowLeft, TrendingUp, AlertTriangle, BarChart3 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Shield, ArrowLeft, TrendingUp, AlertTriangle, BarChart3, Settings, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { ModelRetraining } from "@/components/analysis/ModelRetraining";
 
 interface Stats {
   total: number;
@@ -92,86 +94,105 @@ const Insights = () => {
           <h1 className="text-3xl font-bold">Model Insights</h1>
         </div>
 
-        {stats.total === 0 ? (
-          <Card className="p-12 text-center">
-            <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No data yet</h3>
-            <p className="text-muted-foreground mb-6">
-              Analyze some news articles to see insights
-            </p>
-            <Button onClick={() => navigate("/")}>
-              Analyze News
-            </Button>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-6 h-6 text-primary" />
-                <h3 className="text-xl font-semibold">Total Analyses</h3>
-              </div>
-              <p className="text-4xl font-bold text-primary">{stats.total}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Articles analyzed
-              </p>
-            </Card>
+        <Tabs defaultValue="stats" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="stats" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Statistics
+            </TabsTrigger>
+            <TabsTrigger value="model" className="flex items-center gap-2">
+              <Brain className="w-4 h-4" />
+              ML Model
+            </TabsTrigger>
+          </TabsList>
 
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="w-6 h-6 text-success" />
-                <h3 className="text-xl font-semibold">Average Confidence</h3>
-              </div>
-              <p className="text-4xl font-bold text-success">
-                {Math.round(stats.avgConfidence * 100)}%
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Model confidence level
-              </p>
-            </Card>
+          <TabsContent value="stats">
+            {stats.total === 0 ? (
+              <Card className="p-12 text-center">
+                <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No data yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Analyze some news articles to see insights
+                </p>
+                <Button onClick={() => navigate("/")}>
+                  Analyze News
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TrendingUp className="w-6 h-6 text-primary" />
+                    <h3 className="text-xl font-semibold">Total Analyses</h3>
+                  </div>
+                  <p className="text-4xl font-bold text-primary">{stats.total}</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Articles analyzed
+                  </p>
+                </Card>
 
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="w-6 h-6 text-success" />
-                <h3 className="text-xl font-semibold">Authentic News</h3>
-              </div>
-              <p className="text-4xl font-bold text-success mb-2">{stats.authentic}</p>
-              <Progress value={authenticPercent} className="h-2 mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {authenticPercent.toFixed(1)}% of total
-              </p>
-            </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Shield className="w-6 h-6 text-success" />
+                    <h3 className="text-xl font-semibold">Average Confidence</h3>
+                  </div>
+                  <p className="text-4xl font-bold text-success">
+                    {Math.round(stats.avgConfidence * 100)}%
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Model confidence level
+                  </p>
+                </Card>
 
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <AlertTriangle className="w-6 h-6 text-destructive" />
-                <h3 className="text-xl font-semibold">Misinformation</h3>
-              </div>
-              <p className="text-4xl font-bold text-destructive mb-2">{stats.misinformation}</p>
-              <Progress value={misinfoPercent} className="h-2 mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {misinfoPercent.toFixed(1)}% of total
-              </p>
-            </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Shield className="w-6 h-6 text-success" />
+                    <h3 className="text-xl font-semibold">Authentic News</h3>
+                  </div>
+                  <p className="text-4xl font-bold text-success mb-2">{stats.authentic}</p>
+                  <Progress value={authenticPercent} className="h-2 mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {authenticPercent.toFixed(1)}% of total
+                  </p>
+                </Card>
 
-            <Card className="p-6 md:col-span-2">
-              <h3 className="text-xl font-semibold mb-4">About This Model</h3>
-              <div className="space-y-3 text-sm text-muted-foreground">
-                <p>
-                  <strong>Context:</strong> This AI model is specifically trained to understand Nigerian news patterns, including political, social, and cultural contexts.
-                </p>
-                <p>
-                  <strong>Technology:</strong> Powered by advanced language models with real-time analysis capabilities.
-                </p>
-                <p>
-                  <strong>Accuracy:</strong> The model provides confidence scores to help you assess the reliability of each analysis.
-                </p>
-                <p className="text-warning">
-                  <strong>Important:</strong> While highly accurate, no automated system is perfect. Always verify important information through multiple trusted sources.
-                </p>
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <AlertTriangle className="w-6 h-6 text-destructive" />
+                    <h3 className="text-xl font-semibold">Misinformation</h3>
+                  </div>
+                  <p className="text-4xl font-bold text-destructive mb-2">{stats.misinformation}</p>
+                  <Progress value={misinfoPercent} className="h-2 mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {misinfoPercent.toFixed(1)}% of total
+                  </p>
+                </Card>
+
+                <Card className="p-6 md:col-span-2">
+                  <h3 className="text-xl font-semibold mb-4">About This System</h3>
+                  <div className="space-y-3 text-sm text-muted-foreground">
+                    <p>
+                      <strong>Architecture:</strong> Hybrid system combining PyTorch neural network (TF-IDF + 2-layer NN) with multi-algorithm analysis.
+                    </p>
+                    <p>
+                      <strong>Technology:</strong> PyTorch model deployed on Hugging Face Spaces, with 5 specialized analysis algorithms for comprehensive evaluation.
+                    </p>
+                    <p>
+                      <strong>Accuracy:</strong> PyTorch model achieves 69.5% accuracy, 99.2% precision on the misinformation dataset.
+                    </p>
+                    <p className="text-warning">
+                      <strong>Important:</strong> While effective, no automated system is perfect. Always verify important information through multiple trusted sources.
+                    </p>
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
-        )}
+            )}
+          </TabsContent>
+
+          <TabsContent value="model">
+            <ModelRetraining />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

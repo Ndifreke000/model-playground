@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ScanSearch, Sparkles, FileSearch, Scale, MessageCircle, Eye, Shield } from "lucide-react";
+import { Loader2, ScanSearch, Sparkles, FileSearch, Scale, MessageCircle, Eye, Shield, Brain, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { AdvancedAnalysisResult } from "@/types/analysis";
+import { AdvancedAnalysisResult, MLModelResult } from "@/types/analysis";
 import { AlgorithmCard } from "./AlgorithmCard";
 import { SynthesisCard } from "./SynthesisCard";
 import { InvestigationChat } from "./InvestigationChat";
+import { MLModelCard } from "./MLModelCard";
+import { ModelRetraining } from "./ModelRetraining";
+import { misinformationAPI } from "@/lib/api/misinformation";
 
 const exampleTexts = [
   "Breaking: President announces new economic reforms aimed at reducing inflation and boosting local manufacturing. Finance Minister confirms details in official statement.",
@@ -21,8 +24,9 @@ export const AdvancedAnalyzer = () => {
   const [text, setText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AdvancedAnalysisResult | null>(null);
+  const [mlResult, setMlResult] = useState<MLModelResult | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("algorithms");
+  const [activeTab, setActiveTab] = useState("synthesis");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,28 +53,47 @@ export const AdvancedAnalyzer = () => {
 
     setIsAnalyzing(true);
     setResult(null);
+    setMlResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-news-advanced', {
-        body: { text }
-      });
+      // Run both analyses in parallel
+      const [advancedResponse, mlPrediction] = await Promise.allSettled([
+        supabase.functions.invoke('analyze-news-advanced', { body: { text } }),
+        misinformationAPI.predict(text)
+      ]);
 
-      if (error) throw error;
+      // Handle advanced analysis result
+      if (advancedResponse.status === 'fulfilled') {
+        const { data, error } = advancedResponse.value;
+        if (error) throw error;
 
-      if (data.error) {
-        if (data.error.includes('Rate limit')) {
-          toast.error("Rate limit exceeded. Please try again later.");
+        if (data.error) {
+          if (data.error.includes('Rate limit')) {
+            toast.error("Rate limit exceeded. Please try again later.");
+          } else {
+            toast.error(data.error);
+          }
         } else {
-          toast.error(data.error);
+          setResult(data);
         }
-        return;
+      } else {
+        console.error("Advanced analysis failed:", advancedResponse.reason);
+        toast.error("Advanced analysis failed");
       }
 
-      setResult(data);
+      // Handle ML model result
+      if (mlPrediction.status === 'fulfilled') {
+        setMlResult(mlPrediction.value);
+      } else {
+        console.error("ML prediction failed:", mlPrediction.reason);
+        toast.warning("PyTorch model prediction unavailable - service may be starting up");
+      }
+
       setActiveTab("synthesis");
 
-      // Save to history if user is logged in
-      if (user) {
+      // Save to history if user is logged in and we have results
+      if (user && advancedResponse.status === 'fulfilled' && advancedResponse.value.data?.synthesis) {
+        const data = advancedResponse.value.data;
         await supabase.from("analysis_history").insert({
           user_id: user.id,
           text: text,
@@ -80,7 +103,7 @@ export const AdvancedAnalyzer = () => {
         });
       }
 
-      toast.success("Advanced analysis complete!");
+      toast.success("Analysis complete!");
     } catch (error: any) {
       console.error("Analysis error:", error);
       toast.error("Failed to analyze text. Please try again.");
@@ -96,7 +119,7 @@ export const AdvancedAnalyzer = () => {
           <ScanSearch className="w-6 h-6 text-primary" />
           <div>
             <h2 className="text-xl font-semibold text-card-foreground">Advanced Multi-Algorithm Analysis</h2>
-            <p className="text-sm text-muted-foreground">5 specialized AI algorithms analyze your text from different perspectives</p>
+            <p className="text-sm text-muted-foreground">5 AI algorithms + PyTorch ML model analyze your text</p>
           </div>
         </div>
 
@@ -115,7 +138,7 @@ export const AdvancedAnalyzer = () => {
               key={idx}
               variant="outline"
               size="sm"
-              onClick={() => { setText(example); setResult(null); }}
+              onClick={() => { setText(example); setResult(null); setMlResult(null); }}
               disabled={isAnalyzing}
               className="text-xs"
             >
@@ -141,7 +164,7 @@ export const AdvancedAnalyzer = () => {
           {isAnalyzing ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Running 5 AI Algorithms...
+              Running Analysis...
             </>
           ) : (
             <>
@@ -152,62 +175,104 @@ export const AdvancedAnalyzer = () => {
         </Button>
       </Card>
 
-      {result && (
+      {(result || mlResult) && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="animate-fade-in">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="synthesis" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="synthesis" className="flex items-center gap-1 text-xs sm:text-sm">
               <Shield className="w-4 h-4" />
-              Synthesis
+              <span className="hidden sm:inline">Synthesis</span>
             </TabsTrigger>
-            <TabsTrigger value="algorithms" className="flex items-center gap-2">
+            <TabsTrigger value="ml-model" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Brain className="w-4 h-4" />
+              <span className="hidden sm:inline">ML Model</span>
+            </TabsTrigger>
+            <TabsTrigger value="algorithms" className="flex items-center gap-1 text-xs sm:text-sm">
               <Scale className="w-4 h-4" />
-              Algorithms
+              <span className="hidden sm:inline">Algorithms</span>
             </TabsTrigger>
-            <TabsTrigger value="investigate" className="flex items-center gap-2">
+            <TabsTrigger value="investigate" className="flex items-center gap-1 text-xs sm:text-sm">
               <MessageCircle className="w-4 h-4" />
-              Investigate
+              <span className="hidden sm:inline">Chat</span>
+            </TabsTrigger>
+            <TabsTrigger value="model-info" className="flex items-center gap-1 text-xs sm:text-sm">
+              <Settings className="w-4 h-4" />
+              <span className="hidden sm:inline">Model</span>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="synthesis" className="mt-4">
-            <SynthesisCard synthesis={result.synthesis} />
+            {result ? (
+              <SynthesisCard synthesis={result.synthesis} />
+            ) : (
+              <Card className="p-6 text-center text-muted-foreground">
+                Advanced synthesis unavailable. Check the ML Model tab for PyTorch prediction.
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="ml-model" className="mt-4">
+            {mlResult ? (
+              <MLModelCard result={mlResult} />
+            ) : (
+              <Card className="p-6 text-center text-muted-foreground">
+                PyTorch model prediction unavailable. The Hugging Face service may be starting up.
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="algorithms" className="mt-4 space-y-4">
-            <AlgorithmCard
-              title="Factual Analysis"
-              icon={<FileSearch className="w-5 h-5 text-blue-100" />}
-              result={result.analyses.factual}
-              color="bg-blue-500/20"
-            />
-            <AlgorithmCard
-              title="Linguistic Analysis"
-              icon={<Eye className="w-5 h-5 text-purple-100" />}
-              result={result.analyses.linguistic}
-              color="bg-purple-500/20"
-            />
-            <AlgorithmCard
-              title="Sentiment & Bias"
-              icon={<Scale className="w-5 h-5 text-amber-100" />}
-              result={result.analyses.sentiment}
-              color="bg-amber-500/20"
-            />
-            <AlgorithmCard
-              title="Source Credibility"
-              icon={<Shield className="w-5 h-5 text-emerald-100" />}
-              result={result.analyses.source}
-              color="bg-emerald-500/20"
-            />
-            <AlgorithmCard
-              title="Propaganda Detection"
-              icon={<MessageCircle className="w-5 h-5 text-rose-100" />}
-              result={result.analyses.propaganda}
-              color="bg-rose-500/20"
-            />
+            {result ? (
+              <>
+                <AlgorithmCard
+                  title="Factual Analysis"
+                  icon={<FileSearch className="w-5 h-5 text-blue-100" />}
+                  result={result.analyses.factual}
+                  color="bg-blue-500/20"
+                />
+                <AlgorithmCard
+                  title="Linguistic Analysis"
+                  icon={<Eye className="w-5 h-5 text-purple-100" />}
+                  result={result.analyses.linguistic}
+                  color="bg-purple-500/20"
+                />
+                <AlgorithmCard
+                  title="Sentiment & Bias"
+                  icon={<Scale className="w-5 h-5 text-amber-100" />}
+                  result={result.analyses.sentiment}
+                  color="bg-amber-500/20"
+                />
+                <AlgorithmCard
+                  title="Source Credibility"
+                  icon={<Shield className="w-5 h-5 text-emerald-100" />}
+                  result={result.analyses.source}
+                  color="bg-emerald-500/20"
+                />
+                <AlgorithmCard
+                  title="Propaganda Detection"
+                  icon={<MessageCircle className="w-5 h-5 text-rose-100" />}
+                  result={result.analyses.propaganda}
+                  color="bg-rose-500/20"
+                />
+              </>
+            ) : (
+              <Card className="p-6 text-center text-muted-foreground">
+                Algorithm analysis unavailable.
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="investigate" className="mt-4">
-            <InvestigationChat originalText={text} analysisResult={result} />
+            {result ? (
+              <InvestigationChat originalText={text} analysisResult={result} />
+            ) : (
+              <Card className="p-6 text-center text-muted-foreground">
+                Investigation chat requires advanced analysis results.
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="model-info" className="mt-4">
+            <ModelRetraining />
           </TabsContent>
         </Tabs>
       )}
