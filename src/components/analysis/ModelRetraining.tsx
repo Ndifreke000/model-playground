@@ -15,7 +15,7 @@ import {
   Info
 } from "lucide-react";
 import { toast } from "sonner";
-import { misinformationAPI } from "@/lib/api/misinformation";
+import { misinformationAPI } from "@/lib/api/misinformation.ts";
 
 interface ModelMetrics {
   accuracy: number;

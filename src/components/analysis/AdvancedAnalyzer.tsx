@@ -12,7 +12,7 @@ import { SynthesisCard } from "./SynthesisCard";
 import { InvestigationChat } from "./InvestigationChat";
 import { MLModelCard } from "./MLModelCard";
 import { ModelRetraining } from "./ModelRetraining";
-import { misinformationAPI } from "@/lib/api/misinformation";
+import { misinformationAPI } from "@/lib/api/misinformation.ts";
 
 const exampleTexts = [
   "Breaking: President announces new economic reforms aimed at reducing inflation and boosting local manufacturing. Finance Minister confirms details in official statement.",

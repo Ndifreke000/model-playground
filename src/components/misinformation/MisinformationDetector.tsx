@@ -3,7 +3,7 @@
  * UI for detecting fake news using the ML backend
  */
 import { useState } from 'react';
-import { misinformationAPI, PredictionResult, MisinformationAPIError } from '@/lib/api/misinformation';
+import { misinformationAPI, PredictionResult, MisinformationAPIError } from '@/lib/api/misinformation.ts';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
