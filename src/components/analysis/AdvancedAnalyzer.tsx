@@ -59,54 +59,69 @@ export const AdvancedAnalyzer = () => {
       // Run both analyses in parallel
       const [advancedResponse, mlPrediction] = await Promise.allSettled([
         supabase.functions.invoke('analyze-news-advanced', { body: { text } }),
-        misinformationAPI.predict(text)
+        misinformationAPI.predict(text).catch(err => {
+          console.log("ML API unavailable:", err.message);
+          return null;
+        })
       ]);
+
+      let hasResults = false;
 
       // Handle advanced analysis result
       if (advancedResponse.status === 'fulfilled') {
         const { data, error } = advancedResponse.value;
-        if (error) throw error;
-
-        if (data.error) {
-          if (data.error.includes('Rate limit')) {
-            toast.error("Rate limit exceeded. Please try again later.");
+        
+        if (error) {
+          console.error("Edge function error:", error);
+          toast.error("Analysis service temporarily unavailable");
+        } else if (data?.error) {
+          if (data.error.includes('Rate limit') || data.error.includes('429')) {
+            toast.error("Rate limit exceeded. Please wait a moment and try again.");
           } else {
             toast.error(data.error);
           }
-        } else {
+        } else if (data?.synthesis) {
           setResult(data);
+          hasResults = true;
         }
       } else {
         console.error("Advanced analysis failed:", advancedResponse.reason);
-        toast.error("Advanced analysis failed");
       }
 
       // Handle ML model result
-      if (mlPrediction.status === 'fulfilled') {
+      if (mlPrediction.status === 'fulfilled' && mlPrediction.value) {
         setMlResult(mlPrediction.value);
+        hasResults = true;
+      }
+
+      if (hasResults) {
+        setActiveTab("synthesis");
+        toast.success("Analysis complete!");
+        
+        // Save to history if user is logged in and we have advanced results
+        if (user && result) {
+          try {
+            await supabase.from("analysis_history").insert({
+              user_id: user.id,
+              text: text,
+              prediction: result.synthesis.overall_score,
+              confidence: result.synthesis.confidence,
+              is_authentic: result.synthesis.overall_score >= 0.5
+            });
+          } catch (saveError) {
+            console.error("Failed to save to history:", saveError);
+          }
+        }
       } else {
-        console.error("ML prediction failed:", mlPrediction.reason);
-        toast.warning("PyTorch model prediction unavailable - service may be starting up");
+        toast.error("Analysis failed. Please check your connection and try again.");
       }
-
-      setActiveTab("synthesis");
-
-      // Save to history if user is logged in and we have results
-      if (user && advancedResponse.status === 'fulfilled' && advancedResponse.value.data?.synthesis) {
-        const data = advancedResponse.value.data;
-        await supabase.from("analysis_history").insert({
-          user_id: user.id,
-          text: text,
-          prediction: data.synthesis.overall_score,
-          confidence: data.synthesis.confidence,
-          is_authentic: data.synthesis.overall_score >= 0.5
-        });
-      }
-
-      toast.success("Analysis complete!");
     } catch (error: any) {
       console.error("Analysis error:", error);
-      toast.error("Failed to analyze text. Please try again.");
+      if (error.message?.includes('Failed to fetch')) {
+        toast.error("Network error. Please check your connection.");
+      } else {
+        toast.error("Analysis failed. Please try again.");
+      }
     } finally {
       setIsAnalyzing(false);
     }
